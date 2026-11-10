@@ -168,15 +168,17 @@ main>section{min-width:0}
 .presale li:nth-child(3n+2)::before{background:var(--geel)}
 .presale li:nth-child(3n)::before{background:var(--groen)}
 .note{margin-top:16px;font-style:italic;font-weight:700;opacity:.85}
-.online{display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--groen);color:var(--zwart);border:3px solid var(--zwart);border-radius:18px;padding:16px 18px;box-shadow:0 6px 0 var(--zwart);transition:transform .15s,box-shadow .15s}
-.online:hover{transform:translateY(3px);box-shadow:0 3px 0 var(--zwart)}
-.online-ico{font-size:1.8rem}
-.online-txt{flex:1;display:grid;line-height:1.2}
-.online-txt b{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,5.5vw,1.7rem);text-transform:uppercase}
-.online-txt small{font-weight:700;font-size:.85rem;opacity:.75}
-.online-arrow{font-family:var(--display);font-size:1.8rem;transition:transform .2s}
-.online:hover .online-arrow{transform:translateX(5px)}
-.of{display:flex;align-items:center;gap:12px;margin:22px 0 14px;font-size:.75rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--geel)}
+.shop{background:var(--wit);color:var(--zwart);border:3px solid var(--zwart);border-radius:18px;box-shadow:0 6px 0 var(--zwart);overflow:hidden}
+.shop-head{display:flex;align-items:center;gap:10px;background:var(--groen);padding:12px 16px;border-bottom:3px solid var(--zwart)}
+.shop-head span{font-size:1.4rem}
+.shop-head b{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,5vw,1.5rem);text-transform:uppercase}
+.shop-body{position:relative;min-height:380px;background:#fff}
+.shop-body::before{content:"Ticketshop laden…";position:absolute;inset:0;display:grid;place-items:center;font-weight:700;color:#888}
+.ot-iframe{position:relative;z-index:1}
+.ot-iframe iframe{display:block;width:100%!important;border:0!important;background:#fff}
+.shop-alt{margin-top:12px;font-size:.85rem;opacity:.8;text-align:center}
+.shop-alt a{color:var(--geel);font-weight:700}
+.of{display:flex;align-items:center;gap:12px;margin:26px 0 14px;font-size:.75rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--geel)}
 .of::before,.of::after{content:"";flex:1;height:2px;background:var(--rand)}
 
 /* sponsors */
@@ -241,7 +243,7 @@ footer a{color:var(--geel)}
     <div class="cd"><span id="cd-s">00</span><small>sec</small></div>
   </div>
 
-  <a class="btn" href="#kaarten">🎟️ Kaarten kopen</a>
+  <a class="btn" href="#shop">🎟️ Kaarten kopen</a>
   <span class="scroll">SCROLL ↓</span>
 </header>
 
@@ -304,12 +306,16 @@ footer a{color:var(--geel)}
         <div class="vvk"><small>Voorverkoop</small><strong>€19,50</strong></div>
         <div class="kassa"><small>Dagkassa</small><strong>€22,50</strong></div>
       </div>
-      <!-- ✏️ Link naar je online ticketshop -->
-      <a class="online" href="[LINK-TICKETSHOP]" target="_blank" rel="noopener">
-        <span class="online-ico">🎟️</span>
-        <span class="online-txt"><b>Bestel online</b><small>Direct je kaarten, voor de voorverkoopprijs</small></span>
-        <span class="online-arrow">→</span>
-      </a>
+      <!-- Online ticketshop (Weeztix / Eventix) -->
+      <div class="shop" id="shop">
+        <div class="shop-head"><span>🎟️</span><b>Bestel direct online</b></div>
+        <div class="shop-body">
+          <div class="ot-iframe"
+            data-ot-url="https://shop.weeztix.com/b1a8c6cd-91f5-11ee-a9cb-7e126431635e"
+            data-ot-guid="b1a8c6cd-91f5-11ee-a9cb-7e126431635e"></div>
+        </div>
+      </div>
+      <p class="shop-alt">Laadt de shop niet? <a href="https://shop.weeztix.com/b1a8c6cd-91f5-11ee-a9cb-7e126431635e" target="_blank" rel="noopener">Open hem in een nieuw venster →</a></p>
       <div class="of"><span>of haal ze bij</span></div>
       <h3>Voorverkoopadressen</h3>
       <!-- ✏️ Voorverkoopadressen -->
@@ -447,6 +453,30 @@ footer a{color:var(--geel)}
       if(s.rond){x.beginPath();x.arc(0,0,s.h*.8,0,6.28);x.fill()}else{x.scale(1,Math.cos(s.sw*2));x.fillRect(-s.w/2,-s.h/2,s.w,s.h)}
       x.restore()}
     requestAnimationFrame(loop)})();
+})();
+</script>
+<script>
+/* Weeztix-ticketshop: pas laden als de pagina klaar is, met één automatische herstart als hij blijft hangen */
+(function(){
+  var SRC='https://v1.widget.shop.weeztix.com/injector.js',box=document.querySelector('.ot-iframe'),pogingen=0;
+  if(!box)return;
+  var leeg=box.outerHTML;
+  function laad(){
+    pogingen++;
+    var sc=document.createElement('script');
+    sc.src=SRC+(pogingen>1?'?r='+Date.now():'');
+    document.body.appendChild(sc);
+    if(pogingen<2)setTimeout(controleer,9000);
+  }
+  function controleer(){
+    var f=document.querySelector('.ot-iframe iframe');
+    /* werkt de shop, dan zet hij zelf een hoogte op het iframe; zo niet, opnieuw opbouwen */
+    if(f&&f.style.height)return;
+    var oud=document.querySelector('.ot-iframe');
+    if(oud){var tmp=document.createElement('div');tmp.innerHTML=leeg;oud.replaceWith(tmp.firstChild)}
+    laad();
+  }
+  if(document.readyState==='complete')laad();else addEventListener('load',laad);
 })();
 </script>
 </body>
